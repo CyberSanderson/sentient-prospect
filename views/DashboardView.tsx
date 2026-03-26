@@ -43,6 +43,28 @@ const EMPTY_USER_STATS: UserStats = {
   businessName: ''
 };
 
+const parseApiResponse = async (response: Response) => {
+  const rawText = await response.text();
+  const contentType = response.headers.get('content-type') || '';
+
+  if (!rawText) {
+    return null;
+  }
+
+  if (contentType.includes('application/json')) {
+    return JSON.parse(rawText);
+  }
+
+  try {
+    return JSON.parse(rawText);
+  } catch {
+    return {
+      error: rawText.trim() || `Request failed with status ${response.status}`,
+      rawText
+    };
+  }
+};
+
 const DashboardView: React.FC<DashboardViewProps> = ({ leads, isDemoMode }) => {
   const { getToken, isLoaded: authLoaded } = useAuth();
   const { user } = useUser();
@@ -150,13 +172,18 @@ const DashboardView: React.FC<DashboardViewProps> = ({ leads, isDemoMode }) => {
         })
       });
 
-      const data = await response.json();
+      const data = await parseApiResponse(response);
       if (!response.ok) {
         if (response.status === 403) {
-            if (window.confirm(data.error || "Daily limit reached.")) window.location.href = 'https://buy.stripe.com/bJeaEW6Xf2kp5Zc3qAdAk03';
-        } else { alert(data.error || "Analysis failed."); }
+            if (window.confirm(data?.error || "Daily limit reached.")) window.location.href = 'https://buy.stripe.com/bJeaEW6Xf2kp5Zc3qAdAk03';
+        } else { alert(data?.error || `Analysis failed with status ${response.status}.`); }
         return;
       }
+
+      if (!data || typeof data !== 'object' || !('personality' in data)) {
+        throw new Error(typeof data?.error === 'string' ? data.error : 'The server returned an invalid dossier response.');
+      }
+
       setDossier(data);
       if (user) {
           const today = new Date().toISOString().split('T')[0];
