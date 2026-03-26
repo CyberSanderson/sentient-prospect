@@ -3,7 +3,6 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
-import { normalizeUserStats } from '../lib/dataMappers';
 
 // 1. Initialize Firebase Admin
 if (!getApps().length) {
@@ -82,8 +81,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Get current data
-    const userData = normalizeUserStats(userDoc.data());
-    let currentUsage = userData.usageCount;
+    let userData = userDoc.data() || {};
+    let currentUsage = userData.usageCount || 0;
     
     // Daily Reset Logic
     const today = new Date().toISOString().split('T')[0]; 
@@ -94,7 +93,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Admin Bypass
     const isAdmin = email === 'lifeinnovations7@gmail.com'; 
-    const isPro = userData.plan === 'pro' || userData.plan === 'enterprise' || isAdmin;
+    const isPro = userData.plan === 'pro' || userData.plan === 'premium' || isAdmin;
     const limit = isPro ? 100 : 3;
 
     if (currentUsage >= limit) {

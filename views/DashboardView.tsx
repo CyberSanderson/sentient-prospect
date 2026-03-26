@@ -7,8 +7,7 @@ import {
 import { collection, addDoc, doc, updateDoc, setDoc, getDocs, onSnapshot } from 'firebase/firestore'; 
 import { signInWithCredential, OAuthProvider } from 'firebase/auth'; 
 import { db, auth } from '../lib/firebase'; 
-import { Lead, Dossier, LeadStage, UserRecord, UserStats } from '../types'; 
-import { normalizeUserRecord, normalizeUserStats } from '../lib/dataMappers';
+import { Lead, Dossier } from '../types'; 
 import { useAuth, useUser, SignInButton, SignUpButton } from '@clerk/clerk-react'; 
 import { useReactToPrint } from 'react-to-print';
 
@@ -36,13 +35,6 @@ interface DashboardViewProps {
   isDemoMode: boolean;
 }
 
-const EMPTY_USER_STATS: UserStats = {
-  plan: 'free',
-  usageCount: 0,
-  lastUsageDate: '',
-  businessName: ''
-};
-
 const DashboardView: React.FC<DashboardViewProps> = ({ leads, isDemoMode }) => {
   const { getToken, isLoaded: authLoaded } = useAuth();
   const { user } = useUser();
@@ -56,9 +48,9 @@ const DashboardView: React.FC<DashboardViewProps> = ({ leads, isDemoMode }) => {
     documentTitle: `Sentient_Dossier_${new Date().toLocaleDateString()}`,
   });
 
-  const [adminUsers, setAdminUsers] = useState<UserRecord[]>([]);
+  const [adminUsers, setAdminUsers] = useState<any[]>([]);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
-  const [userStats, setUserStats] = useState<UserStats>(EMPTY_USER_STATS);
+  const [userStats, setUserStats] = useState({ plan: 'free', usageCount: 0, lastUsageDate: '', businessName: '' });
   
   const isAdmin = user?.primaryEmailAddress?.emailAddress === "lifeinnovations7@gmail.com"; 
 
@@ -81,9 +73,9 @@ const DashboardView: React.FC<DashboardViewProps> = ({ leads, isDemoMode }) => {
     if (user && !isDemoMode) {
         const unsub = onSnapshot(doc(db, 'users', user.id), (docSnapshot) => {
             if (docSnapshot.exists()) {
-            setUserStats(normalizeUserStats(docSnapshot.data()));
+                setUserStats(docSnapshot.data() as any);
             } else {
-            setUserStats(EMPTY_USER_STATS);
+                setUserStats({ plan: 'free', usageCount: 0, lastUsageDate: '', businessName: '' });
             }
         });
         return () => unsub(); 
@@ -96,7 +88,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ leads, isDemoMode }) => {
       const fetchUsers = async () => {
         try {
             const snap = await getDocs(collection(db, 'users'));
-          setAdminUsers(snap.docs.map(d => normalizeUserRecord(d.id, d.data())));
+            setAdminUsers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
         } catch (e) { console.error("Admin fetch error", e); }
       };
       fetchUsers();
@@ -173,12 +165,12 @@ const DashboardView: React.FC<DashboardViewProps> = ({ leads, isDemoMode }) => {
     if (!dossier || !user || isDemoMode) return;
     setSaving(true);
     try {
-      await addDoc(collection(db, 'leads'), { userId: user.id, name, company, role, stage: LeadStage.NEW, dossier, value: 0, createdAt: new Date() });
+      await addDoc(collection(db, 'leads'), { userId: user.id, name, company, role, stage: 'New', dossier, value: 0, createdAt: new Date() });
       setSaved(true);
     } catch (error) { alert("Failed to save lead."); } finally { setSaving(false); }
   };
 
-  const isPro = userStats.plan === 'pro' || userStats.plan === 'enterprise' || isAdmin;
+  const isPro = userStats.plan === 'pro' || userStats.plan === 'premium' || isAdmin;
   const limit = isPro ? 1000 : 3; 
   const creditsLeft = Math.max(0, limit - (userStats.usageCount || 0));
 

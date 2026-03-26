@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import PipelineView from '../views/PipelineView';
-import { Lead } from '../types';
-import { normalizeLead } from '../lib/dataMappers';
+import PipelineView from '../components/PipelineView';
+import { Lead, LeadStage } from '../types';
 import { Loader } from 'lucide-react';
 
 export default function Prospects() {
@@ -17,7 +16,24 @@ export default function Prospects() {
         const q = query(collection(db, "leads"));
         const querySnapshot = await getDocs(q);
         
-        const fetchedLeads: Lead[] = querySnapshot.docs.map(snapshot => normalizeLead(snapshot.id, snapshot.data()));
+        // 2. Format the data to prevent crashes
+        const fetchedLeads: Lead[] = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          
+          return {
+            id: doc.id,
+            // ⚠️ SAFE FALLBACKS: If data is missing, use these defaults
+            company: data.company || "Unknown Company",
+            name: data.contactName || "Unknown Contact",
+            stage: (data.status as LeadStage) || LeadStage.NEW,
+            value: data.value || 0, // Prevents .toLocaleString() crash
+            lastContact: data.createdAt ? data.createdAt.toDate() : new Date(),
+            aiScore: data.aiScore || 50,
+            // Keep other fields if you have them
+            email: data.email || "",
+            role: data.role || "",
+          } as Lead;
+        });
 
         setLeads(fetchedLeads);
       } catch (error) {

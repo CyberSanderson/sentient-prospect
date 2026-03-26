@@ -24,7 +24,7 @@ const PipelineView: React.FC<PipelineViewProps> = ({ leads }) => {
     try {
       const leadRef = doc(db, 'leads', draggableId);
       await updateDoc(leadRef, {
-        stage: destination.droppableId as LeadStage
+        stage: destination.droppableId
       });
     } catch (error) {
       console.error("Error moving lead:", error);
