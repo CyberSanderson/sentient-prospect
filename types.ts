@@ -1,4 +1,5 @@
-// 1. NAVIGATION VIEWS
+import { Timestamp } from 'firebase/firestore'; 
+
 export type View = 
   | 'dashboard' 
   | 'pipeline' 
@@ -8,9 +9,8 @@ export type View =
   | 'privacy' 
   | 'terms' 
   | 'refunds'
-  | 'admin'; // 👈 ADD THIS
+  | 'admin';
 
-// ... rest of your file stays exactly the same ...
 export enum LeadStage {
   NEW = 'New',
   CONTACTED = 'Contacted',
@@ -34,11 +34,11 @@ export interface Lead {
   name: string;
   company: string;
   role: string;
-  stage: LeadStage | string; 
+  stage: LeadStage; 
   value: number;
   dossier?: Dossier; 
-  createdAt: any; 
-  lastContact?: any;
+  createdAt: Timestamp | Date | string; 
+  lastContact?: Timestamp | Date | string;
   email?: string;
   website?: string;
 }
