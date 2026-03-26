@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { collection, getDocs, doc, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Shield, Zap, Search, Gift, Database, CheckCircle, AlertTriangle } from 'lucide-react';
-import { UserProfile } from '../types';
+import { UserRecord } from '../types';
+import { normalizeUserRecord } from '../lib/dataMappers';
 
 const AdminView = () => {
-  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [users, setUsers] = useState<UserRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -13,7 +14,7 @@ const AdminView = () => {
   const fetchUsers = async () => {
     try {
       const snap = await getDocs(collection(db, 'users'));
-      const loaded = snap.docs.map(d => ({ id: d.id, ...d.data() })) as UserProfile[];
+      const loaded = snap.docs.map(d => normalizeUserRecord(d.id, d.data()));
       setUsers(loaded);
     } catch (error) {
       console.error("Admin Access Error", error);
