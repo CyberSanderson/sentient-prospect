@@ -40,7 +40,7 @@ export default function Prospects() {
 
   return (
     <div className="h-full p-6 bg-slate-50">
-      <PipelineView leads={leads} />
+      <PipelineView leads={leads} setLeads={setLeads} />
     </div>
   );
 }

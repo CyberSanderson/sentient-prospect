@@ -6,6 +6,7 @@ import { db } from '../lib/firebase';
 
 interface LeadsViewProps {
   leads: Lead[];
+  setLeads: React.Dispatch<React.SetStateAction<Lead[]>>;
 }
 
 const LeadsView: React.FC<LeadsViewProps> = ({ leads }) => {
