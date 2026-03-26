@@ -3,7 +3,7 @@ import {
   Bot, Check, Star, ArrowRight, Zap, Shield, BarChart3, 
   Globe, Menu, X, BrainCircuit, LayoutGrid, Search, UserCheck, MessageCircle, Users 
 } from 'lucide-react';
-import { TRUSTED_COMPANIES } from '../constants';
+import { MODERN_STACK_BADGES } from '../constants';
 import { View } from '../types';
 import Footer from '../components/Footer';
 import { HeroVisual } from '../components/landing/HeroVisual';
@@ -125,12 +125,12 @@ const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* 3. TRUSTED BY */}
+      {/* 3. MODERN STACK */}
       <div className="border-t border-slate-100 bg-white py-12 relative z-10">
-        <p className="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest mb-8">Powering research for</p>
+        <p className="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest mb-8">Built with modern infrastructure</p>
         <div className="flex justify-center items-center gap-12 md:gap-20 flex-wrap px-4 opacity-40 grayscale">
-          {TRUSTED_COMPANIES.map((company, i) => (
-            <span key={i} className="text-xl md:text-2xl font-bold text-slate-500 tracking-tighter">{company}</span>
+          {MODERN_STACK_BADGES.map((tech, i) => (
+            <span key={i} className="text-xl md:text-2xl font-bold text-slate-500 tracking-tighter">{tech}</span>
           ))}
         </div>
       </div>

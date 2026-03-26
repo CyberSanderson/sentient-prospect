@@ -88,8 +88,12 @@ export const PRICING_TIERS = [
   }
 ];
 
-export const TRUSTED_COMPANIES = [
-  "Acme Corp", "GlobalTech", "Nebula", "Trio", "FoxRun"
+export const MODERN_STACK_BADGES = [
+  "React",
+  "TypeScript",
+  "AI APIs",
+  "Serverless",
+  "Cloud-Native"
 ];
 
 export const INTEGRATIONS = [
